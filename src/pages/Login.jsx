@@ -73,7 +73,7 @@ function Login(){
                                 La Excelencia en el <br/>
                                 <span className="text-yellow-400">Salón de Billar.</span>
                             </h2>
-                            <p className="text-gray-300 text-4x1">
+                            <p className="text-gray-300 text-4xl">
                                 Accede a la plataforma de gestión más exclusiva. 
                                 Precisión, control y elegancia en cada partida.
                             </p> 

@@ -37,13 +37,15 @@ function Dashboard(){
             </div>
             <div className="flex-1">
                 <div className="p-8">
-                    <h1 className="text-white text-3x1 font-bold mb-8">Tus mesas</h1>
+                    <h1 className="text-white text-3xl font-bold mb-8">Tus mesas</h1>
                     <div className="grid grid-cols-4 gap-6">
                         {mesas.map(mesa => (
                             <MesaCard
                                 key={mesa.id}
                                 numero={mesa.numero}
                                 precio={mesa.precioPorHora}
+                                estado={mesa.estado}
+                                horaInicio={mesa.horaInicio}
                             />
                         ))}
                     </div>
