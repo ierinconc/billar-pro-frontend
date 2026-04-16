@@ -6,6 +6,27 @@ function Dashboard(){
 
     
     const [mesas, setMesas] = useState([])
+
+    const cargarMesas = () => {
+        fetch("http://localhost:8080/api/mesas", {
+            headers : {
+                "Authorization" : "Bearer " + localStorage.getItem("token")
+            }
+        })
+        .then(res => res.json())
+        .then(data => setMesas(data.sort((a,b)=> a.numero - b.numero)))
+    }
+
+    useEffect(()=>{
+        cargarMesas()
+
+        const intervalo = setInterval(()=>{
+            
+            cargarMesas()
+        }, 5000)
+        
+        return () => clearInterval(intervalo)
+    },[])
     
     useEffect(()=>{
         fetch("http://localhost:8080/api/mesas", {
@@ -16,6 +37,7 @@ function Dashboard(){
         .then(res=> res.json())
         .then(data => setMesas(data.sort((a, b) => a.numero - b.numero)))
     },[])
+
 
 
 
@@ -42,10 +64,12 @@ function Dashboard(){
                         {mesas.map(mesa => (
                             <MesaCard
                                 key={mesa.id}
+                                id={mesa.id}
                                 numero={mesa.numero}
                                 precio={mesa.precioPorHora}
                                 estado={mesa.estado}
                                 horaInicio={mesa.horaInicio}
+                                onActualizar={cargarMesas}
                             />
                         ))}
                     </div>

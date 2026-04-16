@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 
 function MesaCard(props){
 
+
     const [tiempoTranscurrido, setTiempoTranscurrido] = useState ("00:00:00")
 
     useEffect(() => {
@@ -26,8 +27,20 @@ function MesaCard(props){
         setTiempoTranscurrido(formato)
     }, 1000)
 
-    return () => clearInterval(intervalo)
-}, [props.estado, props.horaInicio])
+        return () => clearInterval(intervalo)
+
+    }, [props.estado, props.horaInicio])
+
+    const handleOcupar = async () => {
+        await fetch (`http://localhost:8080/api/mesas/${props.id}/ocupar`,{
+            method: "PUT",
+            headers: {
+                "Authorization" : "Bearer " + localStorage.getItem("token")
+            }
+        })
+        props.onActualizar()
+    }
+
 
     return (
         <div className="bg-gray-800 rounded-xl p-6 flex flex-col gap-4">
@@ -43,7 +56,7 @@ function MesaCard(props){
                 <p className="text-yellow-400 text-3xl font-bold">{tiempoTranscurrido}</p>
             </div>
 
-            <button className={props.estado === "LIBRE" ? "w-full bg-yellow-500 text-gray-900  font-bold py-2 rounded-lg hover:bg-yellow-300" : "w-full bg-red-600 text-gray-900  font-bold py-2 rounded-lg hover:bg-red-500"}>
+            <button onClick= {props.estado === "LIBRE" ? handleOcupar : undefined} className={props.estado === "LIBRE" ? "w-full bg-yellow-500 text-gray-900  font-bold py-2 rounded-lg hover:bg-yellow-300" : "w-full bg-red-600 text-gray-900  font-bold py-2 rounded-lg hover:bg-red-500"}>
                 {props.estado === "LIBRE" ? "INICIAR PARTIDA" : "VER DETALLE"}
             </button>
 
