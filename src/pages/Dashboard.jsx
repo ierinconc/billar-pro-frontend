@@ -14,7 +14,7 @@ function Dashboard(){
             }
         })
         .then(res=> res.json())
-        .then(data => setMesas(data))
+        .then(data => setMesas(data.sort((a, b) => a.numero - b.numero)))
     },[])
 
 
