@@ -1,12 +1,54 @@
 import InputField from "../components/InputField"
 import Logo from "../components/Logo"
+import { useState } from "react"
+import { useNavigate } from "react-router-dom"
+
 
 function Login(){
+
+    const [username, setUsername] = useState("")
+    const [password, setPassword] = useState("")
+    const navigate = useNavigate()
+
+    const handleLogin = async () => {
+    console.log("Click en iniciar sesión");
+    console.log("Username:", username);
+    console.log("Password:", password);
+
+    try {
+        const respuesta = await fetch("http://localhost:8080/api/auth/login", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ username, password })
+        });
+
+        console.log("Status HTTP:", respuesta.status);
+        console.log("¿Respuesta OK?:", respuesta.ok);
+
+        const token = await respuesta.text();
+        console.log("Respuesta del backend:", token);
+
+        if (respuesta.ok) {
+            localStorage.setItem("token", token);
+            console.log("Token guardado en localStorage");
+            navigate("/dashboard")
+        } else {
+            console.error("Login falló. Mensaje del backend:", token);
+        }
+
+    } catch (error) {
+        console.error("Error al conectar con el backend:", error);
+    }
+};
+
+
     return(
         <div className="min-h-screen bg-gray-900 flex items-center justify-center">
             {/* Tarjeta centrada */}
             <div className="flex w-4/5 h-[600px] rounded-2xl overflow-hidden shadow-2xl">
-                
+
                 {/* Columna izquierda */}
                 <div 
                 className="w-2/3 relative"
@@ -45,12 +87,12 @@ function Login(){
                     <p className="text-gray-400 mb-8">Identifícate para continuar al salón.</p>
                     
                     <label className="text-yellow-400 text-sm mb-1">USUARIO</label>
-                    <InputField type="text" placeholder="Tu nombre de usuario" />
+                    <InputField type="text" placeholder="Tu nombre de usuario" value={username} onChange={(e)=> setUsername(e.target.value)}  />
                     
                     <label className="text-yellow-400 text-sm mt-4 mb-1">CONTRASEÑA</label>
-                    <InputField type="password" placeholder="••••••••" />
+                    <InputField type="password" placeholder="••••••••" value={password} onChange={(e)=> setPassword(e.target.value)} />
                     
-                    <button className="w-full bg-yellow-400 text-gray-900 font-bold py-3 rounded-lg mt-6 hover:bg-yellow-300">
+                    <button onClick={handleLogin} className="w-full bg-yellow-400 text-gray-900 font-bold py-3 rounded-lg mt-6 hover:bg-yellow-300">
                         INICIAR SESIÓN
                     </button>
                 </div>
