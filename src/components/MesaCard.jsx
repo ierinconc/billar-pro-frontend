@@ -43,7 +43,9 @@ function MesaCard(props){
 
 
     return (
-        <div className="bg-gray-800 rounded-xl p-6 flex flex-col gap-4">
+        <div className={`bg-gray-800 rounded-xl p-6 flex flex-col gap-4 border-2 ${
+            props.estado === "OCUPADA" ? "border-red-400" : "border-transparent"
+        }`}>
             <div className="flex justify-between items-center">
                 <h2 className="text-white text-x1 font-bold">Mesa {props.numero}</h2>
                 <span className={props.estado === "LIBRE" ? "bg-green-500 text-white text-xs px-2 py-1 rounded-full" : "bg-yellow-400 text-white text-xs px-2 py-1 rounded-full"}>{props.estado}</span>

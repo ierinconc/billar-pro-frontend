@@ -54,7 +54,7 @@ function Dashboard(){
                 <Logo/>
                 <nav className="mt-8 flex flex-col gap-2">
                     <button className="text-left px-4 py-3 text-yellow-400 bg-gray-700 rounded-lg">
-                        Dashboard
+                        Control del salón
                     </button>
                     <button className="text-left px-4 py-3 text-gray-400 hover:text-white rounded-lg">
                         Productos
@@ -66,7 +66,7 @@ function Dashboard(){
             </div>
             <div className="flex-1">
                 <div className="p-8">
-                    <h1 className="text-white text-3xl font-bold mb-8">Tus mesas</h1>
+                    <h1 className="text-white text-3xl font-bold mb-8">Tu salón hoy</h1>
                     <div className="grid grid-cols-4 gap-6">
                         {mesas.map(mesa => (
                             <MesaCard
@@ -85,6 +85,7 @@ function Dashboard(){
             </div>
             {mesaSeleccionada && (
             <ModalMesa
+                id={mesaSeleccionada.id}
                 numero={mesaSeleccionada.numero}
                 horaInicio={mesaSeleccionada.horaInicio}
                 onCerrar={() => setMesaSeleccionada(null)}

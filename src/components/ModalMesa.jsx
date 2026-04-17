@@ -1,9 +1,11 @@
-import { useState, useEffect, use } from "react"
+import { useState, useEffect } from "react"
 
 
 
 function ModalMesa(props){
     const [tiempoTranscurrido, setTiempoTranscurrido] = useState("00:00:00")
+    const[consumos, setConsumos] = useState([])
+    const [resumen, setResumen] = useState(null)
 
     useEffect(()=>{
         const intervalo = setInterval(()=>{
@@ -26,6 +28,31 @@ function ModalMesa(props){
         }, 1000)
         return()=> clearInterval (intervalo)
     }, [props.horaInicio])
+
+    useEffect(()=>{
+        fetch(`http://localhost:8080/api/consumos/mesa/${props.id}`, {
+            headers : {
+                "Authorization" : "Bearer " + localStorage.getItem("token")
+            }
+        })
+        .then(res=> res.json())
+        .then(data => setConsumos(data))
+    },[])
+
+
+    const handleCerrarMesa = async ()=>{
+        const respuesta = await fetch(`http://localhost:8080/api/mesas/${props.id}/cerrar`, {
+            method: "PUT",
+            headers: {
+                "Authorization" : "Bearer " + localStorage.getItem("token")
+            }
+        })
+        const data = await respuesta.json()
+        setResumen(data)
+    }
+
+    const formatCOP = (valor) => 
+    new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(valor)
 
     return(
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
@@ -58,7 +85,16 @@ function ModalMesa(props){
                             + Agregar
                         </button>
                     </div>
-                    <p className="text-gray-400 text-sm">No hay consumos registrados.</p>
+
+                    {consumos.length === 0 
+                        ? <p className="text-gray-400 text-sm">No hay consumos registrados.</p>
+                        : consumos.map(consumo => (
+                            <div key={consumo.id} className="flex justify-between items-center py-3 border-b border-gray-700">
+                                <span className="text-white">{consumo.producto.nombre} x{consumo.cantidad}</span>
+                                <span className="text-yellow-400">${consumo.subtotal}</span>
+                            </div>
+                        ))
+                    } 
                 </div>
 
                 
@@ -77,11 +113,43 @@ function ModalMesa(props){
                     </div>
                 </div>
 
-                <button className="w-full bg-red-600 text-white font-bold py-3 rounded-xl hover:bg-red-500">
+                <button 
+                    onClick={handleCerrarMesa}
+                    className="w-full bg-red-600 text-white font-bold py-3 rounded-xl hover:bg-red-500">
                     CERRAR MESA
                 </button>
 
             </div>
+            {resumen && (
+            <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50">
+                <div className="bg-gray-800 rounded-2xl p-8 w-2/5">
+                    <h2 className="text-white text-2xl font-bold mb-6">Resumen de Cobro</h2>
+                    
+                    <div className="flex justify-between text-gray-400 text-sm mb-2">
+                        <span>Horas jugadas</span>
+                        <span>{resumen.horasJugadas.toFixed(2)}h</span>
+                    </div>
+                    <div className="flex justify-between text-gray-400 text-sm mb-2">
+                        <span>Tiempo de juego</span>
+                        <span>{formatCOP(resumen.totalAPagar)}</span>
+                    </div>
+                    <div className="flex justify-between text-gray-400 text-sm mb-4">
+                        <span>Consumos</span>
+                        <span>{formatCOP(resumen.totalConsumos)}</span>
+                    </div>
+                    <div className="flex justify-between text-white font-bold text-xl mb-8">
+                        <span>TOTAL</span>
+                        <span>{formatCOP(resumen.totalGeneral)}</span>
+                    </div>
+
+                    <button 
+                        onClick={props.onCerrar}
+                        className="w-full bg-yellow-400 text-gray-900 font-bold py-3 rounded-xl hover:bg-yellow-300">
+                        CONFIRMAR Y CERRAR
+                    </button>
+                </div>
+            </div>
+)}
         </div>
     )
 }
