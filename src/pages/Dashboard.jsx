@@ -1,6 +1,7 @@
 import Logo from "../components/Logo"
 import MesaCard from "../components/MesaCard"
 import { useEffect, useState } from "react"
+import ModalMesa from "../components/ModalMesa"
 
 function Dashboard(){
 
@@ -16,6 +17,9 @@ function Dashboard(){
         .then(res => res.json())
         .then(data => setMesas(data.sort((a,b)=> a.numero - b.numero)))
     }
+
+    const [mesaSeleccionada, setMesaSeleccionada] = useState(null)
+
 
     useEffect(()=>{
         cargarMesas()
@@ -37,6 +41,9 @@ function Dashboard(){
         .then(res=> res.json())
         .then(data => setMesas(data.sort((a, b) => a.numero - b.numero)))
     },[])
+
+    
+
 
 
 
@@ -70,11 +77,19 @@ function Dashboard(){
                                 estado={mesa.estado}
                                 horaInicio={mesa.horaInicio}
                                 onActualizar={cargarMesas}
+                                onVerDetalle={()=> setMesaSeleccionada(mesa)}
                             />
                         ))}
                     </div>
                 </div>
             </div>
+            {mesaSeleccionada && (
+            <ModalMesa
+                numero={mesaSeleccionada.numero}
+                horaInicio={mesaSeleccionada.horaInicio}
+                onCerrar={() => setMesaSeleccionada(null)}
+            />    
+        )}
         </div>
 
     )

@@ -56,7 +56,7 @@ function MesaCard(props){
                 <p className="text-yellow-400 text-3xl font-bold">{tiempoTranscurrido}</p>
             </div>
 
-            <button onClick= {props.estado === "LIBRE" ? handleOcupar : undefined} className={props.estado === "LIBRE" ? "w-full bg-yellow-500 text-gray-900  font-bold py-2 rounded-lg hover:bg-yellow-300" : "w-full bg-red-600 text-gray-900  font-bold py-2 rounded-lg hover:bg-red-500"}>
+            <button onClick= {props.estado === "LIBRE" ? handleOcupar : props.onVerDetalle} className={props.estado === "LIBRE" ? "w-full bg-yellow-500 text-gray-900  font-bold py-2 rounded-lg hover:bg-yellow-300" : "w-full bg-red-600 text-gray-900  font-bold py-2 rounded-lg hover:bg-red-500"}>
                 {props.estado === "LIBRE" ? "INICIAR PARTIDA" : "VER DETALLE"}
             </button>
 
