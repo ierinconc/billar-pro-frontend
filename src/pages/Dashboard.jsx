@@ -2,6 +2,7 @@ import Logo from "../components/Logo"
 import MesaCard from "../components/MesaCard"
 import { useEffect, useState } from "react"
 import ModalMesa from "../components/ModalMesa"
+import Sidebar from "../components/Sidebar"
 
 function Dashboard(){
 
@@ -50,20 +51,7 @@ function Dashboard(){
 
     return(
         <div className="flex h-screen bg-gray-900">
-            <div className="w-64 bg-gray-800 p-6">
-                <Logo/>
-                <nav className="mt-8 flex flex-col gap-2">
-                    <button className="text-left px-4 py-3 text-yellow-400 bg-gray-700 rounded-lg">
-                        Control del salón
-                    </button>
-                    <button className="text-left px-4 py-3 text-gray-400 hover:text-white rounded-lg">
-                        Productos
-                    </button>
-                    <button className="text-left px-4 py-3 text-gray-400 hover:text-white rounded-lg">
-                        Reportes
-                    </button>
-                </nav>
-            </div>
+            <Sidebar/>
             <div className="flex-1">
                 <div className="p-8">
                     <h1 className="text-white text-3xl font-bold mb-8">Tu salón hoy</h1>
