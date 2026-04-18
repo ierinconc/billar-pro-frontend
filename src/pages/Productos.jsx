@@ -1,12 +1,14 @@
 import Sidebar from "../components/Sidebar"
 import { useState, useEffect } from "react"
 import ModalProducto from "../components/ModalProducto"
-
+import ModalConfirmacion from "../components/ModalConfirmacion"
 
 function Productos () {
     const [productos, setProductos] = useState([])
 
     const [modalAbierto, setModalAbierto] = useState(false)
+
+    const [productoAEliminar, setProductoAEliminar] = useState(null)
 
     useEffect(()=>{
     fetch("http://localhost:8080/api/productos", {
@@ -35,12 +37,27 @@ function Productos () {
         cargarProductos()
     }, [])
 
+    const handleEliminar = (id) => {
+    setProductoAEliminar(id)
+    }
+
+    const confirmarEliminar = async () => {
+    await fetch(`http://localhost:8080/api/productos/${productoAEliminar}`, {
+        method: "DELETE",
+        headers: {
+            "Authorization": "Bearer " + localStorage.getItem("token")
+        }
+    })
+    setProductoAEliminar(null)
+    cargarProductos()
+    }
+
     return (
         <div className="flex min-h-screen bg-gray-900">
             <Sidebar/>
             <div className="flex-1 p-8">
                 <div className="flex justify-between items-center mb-8">
-                    <h1 className="text-white text-3xl font-bold">Productos</h1>
+                    <h1 className="text-white text-3xl font-bold">Tus Productos</h1>
                     <button onClick={()=> setModalAbierto(true)} className="bg-yellow-400 text-gray-900 font-bold px-6 py-3 rounded-lg hover:bg-yellow-300">+ Nuevo Producto</button>
                 </div>
                 <div className="bg-gray-800 rounded-xl overflow-y-auto max-h-[70vh] [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-gray-800 [&::-webkit-scrollbar-thumb]:bg-yellow-400 [&::-webkit-scrollbar-thumb]:rounded-full">
@@ -63,7 +80,7 @@ function Productos () {
                                     <td className="text-gray-400 px-6 py-4">{producto.disponible ? "Sí" : "No"}</td>
                                     <td className="px-6 py-4">
                                         <button className="text-blue-400 hover:text-blue-300 mr-4">Editar</button>
-                                        <button className="text-red-400 hover:text-red-300">Eliminar</button>
+                                        <button onClick={()=> handleEliminar(producto.id)} className="text-red-400 hover:text-red-300">Eliminar</button>
                                     </td>
                                 </tr>
                             ))}
@@ -78,6 +95,14 @@ function Productos () {
                         setModalAbierto(false)
                         cargarProductos()
                     }}
+                />
+            )}
+
+            {productoAEliminar && (
+                <ModalConfirmacion
+                    mensaje="Esta acción no se puede deshacer. El producto será eliminado permanentemente."
+                    onConfirmar={confirmarEliminar}
+                    onCancelar={() => setProductoAEliminar(null)}
                 />
             )}
         </div>

@@ -50,7 +50,7 @@ function Dashboard(){
 
 
     return(
-        <div className="flex h-screen bg-gray-900">
+        <div className="flex min-h-screen bg-gray-900">
             <Sidebar/>
             <div className="flex-1">
                 <div className="p-8">
