@@ -5,32 +5,21 @@ import ModalConfirmacion from "../components/ModalConfirmacion"
 
 function Productos () {
     const [productos, setProductos] = useState([])
-
-    const [modalAbierto, setModalAbierto] = useState(false)
-
+    const [productoAEditar, setProductoAEditar] = useState(null)
     const [productoAEliminar, setProductoAEliminar] = useState(null)
-
-    useEffect(()=>{
-    fetch("http://localhost:8080/api/productos", {
-        headers : {
-            "Authorization" : "Bearer " + localStorage.getItem("token")
-        }
-    })
-    .then(res=> res.json())
-    .then(data => setProductos(data))
-    },[])
+    const [busqueda, setBusqueda] = useState("")
 
     const formatCOP = (valor) => 
-    new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(valor)
+        new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(valor)
 
     const cargarProductos = () => {
-    fetch("http://localhost:8080/api/productos", {
-        headers: {
-            "Authorization": "Bearer " + localStorage.getItem("token")
-        }
-    })
-    .then(res => res.json())
-    .then(data => setProductos(data))
+        fetch("http://localhost:8080/api/productos", {
+            headers: {
+                "Authorization": "Bearer " + localStorage.getItem("token")
+            }
+        })
+        .then(res => res.json())
+        .then(data => setProductos(data))
     }
 
     useEffect(() => {
@@ -38,18 +27,18 @@ function Productos () {
     }, [])
 
     const handleEliminar = (id) => {
-    setProductoAEliminar(id)
+        setProductoAEliminar(id)
     }
 
     const confirmarEliminar = async () => {
-    await fetch(`http://localhost:8080/api/productos/${productoAEliminar}`, {
-        method: "DELETE",
-        headers: {
-            "Authorization": "Bearer " + localStorage.getItem("token")
-        }
-    })
-    setProductoAEliminar(null)
-    cargarProductos()
+        await fetch(`http://localhost:8080/api/productos/${productoAEliminar}`, {
+            method: "DELETE",
+            headers: {
+                "Authorization": "Bearer " + localStorage.getItem("token")
+            }
+        })
+        setProductoAEliminar(null)
+        cargarProductos()
     }
 
     return (
@@ -58,8 +47,18 @@ function Productos () {
             <div className="flex-1 p-8">
                 <div className="flex justify-between items-center mb-8">
                     <h1 className="text-white text-3xl font-bold">Tus Productos</h1>
-                    <button onClick={()=> setModalAbierto(true)} className="bg-yellow-400 text-gray-900 font-bold px-6 py-3 rounded-lg hover:bg-yellow-300">+ Nuevo Producto</button>
+                    <div className="flex gap-3 items-center">
+                        <input 
+                            type="text"
+                            placeholder="🔍 Buscar producto..."
+                            value={busqueda}
+                            onChange={(e) => setBusqueda(e.target.value)}
+                            className="w-72 bg-gray-800 text-white border border-gray-700 rounded-lg px-4 py-3 focus:outline-none focus:border-yellow-400"
+                        />
+                        <button onClick={() => setProductoAEditar({})} className="bg-yellow-400 text-gray-900 font-bold px-6 py-3 rounded-lg hover:bg-yellow-300">+ Nuevo Producto</button>
+                    </div>
                 </div>
+
                 <div className="bg-gray-800 rounded-xl overflow-y-auto max-h-[70vh] [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-gray-800 [&::-webkit-scrollbar-thumb]:bg-yellow-400 [&::-webkit-scrollbar-thumb]:rounded-full">
                     <table className="w-full">
                         <thead>
@@ -72,14 +71,16 @@ function Productos () {
                             </tr>
                         </thead>
                         <tbody>
-                            {productos.map(producto => (
+                            {productos
+                                .filter(producto => producto.nombre.toLowerCase().includes(busqueda.toLowerCase()))
+                                .map(producto => (
                                 <tr key={producto.id} className="border-t border-gray-700">
                                     <td className="text-white px-6 py-4">{producto.nombre}</td>
                                     <td className="text-gray-400 px-6 py-4">{producto.categoria}</td>
                                     <td className="text-yellow-400 px-6 py-4">{formatCOP(producto.precio)}</td>
                                     <td className="text-gray-400 px-6 py-4">{producto.disponible ? "Sí" : "No"}</td>
                                     <td className="px-6 py-4">
-                                        <button className="text-blue-400 hover:text-blue-300 mr-4">Editar</button>
+                                        <button onClick={() => setProductoAEditar(producto)} className="text-blue-400 hover:text-blue-300 mr-4">Editar</button>
                                         <button onClick={()=> handleEliminar(producto.id)} className="text-red-400 hover:text-red-300">Eliminar</button>
                                     </td>
                                 </tr>
@@ -87,17 +88,18 @@ function Productos () {
                         </tbody>
                     </table>
                 </div>
-            </div> 
-            {modalAbierto && (
+            </div>
+
+            {productoAEditar && (
                 <ModalProducto 
-                    onCerrar={() => setModalAbierto(false)}
+                    producto={productoAEditar}
+                    onCerrar={() => setProductoAEditar(null)}
                     onGuardar={() => {
-                        setModalAbierto(false)
+                        setProductoAEditar(null)
                         cargarProductos()
                     }}
                 />
             )}
-
             {productoAEliminar && (
                 <ModalConfirmacion
                     mensaje="Esta acción no se puede deshacer. El producto será eliminado permanentemente."
