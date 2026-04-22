@@ -3,7 +3,7 @@ import Login from "./pages/Login"
 import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom"
 import Productos from "./pages/Productos"
 import PrivateRoute from "./components/PrivateRoute"
-
+import Reportes from "./pages/Reportes"
 
 
 function App() {
@@ -21,6 +21,11 @@ function App() {
             <PrivateRoute>
                 <Productos/>
             </PrivateRoute>
+          } />
+          <Route path="/reportes" element={
+              <PrivateRoute>
+                  <Reportes/>
+              </PrivateRoute>
           } />
         </Routes>  
       </BrowserRouter>
