@@ -6,6 +6,7 @@ function ModalAgregarConsumo(props){
     const [productoSeleccionado, setProductoSeleccionado] = useState("")
     const [cantidad, setCantidad] = useState(1)
     const [carrito, setCarrito] = useState([])
+    const [busquedaProducto, setBusquedaProducto] = useState("")
     
     useEffect(() => {
         fetch("http://localhost:8080/api/productos", {
@@ -74,17 +75,36 @@ function ModalAgregarConsumo(props){
 
                 <div className="mb-4">
                     <label className="text-yellow-400 text-sm mb-1 block">PRODUCTO</label>
-                    <select 
-                        value={productoSeleccionado} 
-                        onChange={(e) => setProductoSeleccionado(e.target.value)} 
-                        className="w-full bg-gray-700 text-white border border-gray-600 rounded-lg px-4 py-3 focus:outline-none focus:border-yellow-400">
-                        <option value="">Selecciona un producto...</option>
-                        {productos.map(producto => (
-                            <option key={producto.id} value={producto.id}>
-                                {producto.nombre} - {new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(producto.precio)}
-                            </option>
-                        ))}
-                    </select>
+                    <input 
+                        type="text"
+                        placeholder="Buscar producto..."
+                        value={busquedaProducto}
+                        onChange={(e) => setBusquedaProducto(e.target.value)}
+                        className="w-full bg-gray-700 text-white border border-gray-600 rounded-lg px-4 py-3 focus:outline-none focus:border-yellow-400"
+                    />
+                    {busquedaProducto && (
+                        <div className="mt-2 bg-gray-700 border border-gray-600 rounded-lg max-h-48 overflow-y-auto [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-gray-700 [&::-webkit-scrollbar-thumb]:bg-yellow-400 [&::-webkit-scrollbar-thumb]:rounded-full">
+                            {productos
+                                .filter(p => p.nombre.toLowerCase().includes(busquedaProducto.toLowerCase()))
+                                .map(producto => (
+                                    <div 
+                                        key={producto.id}
+                                        onClick={() => {
+                                            setProductoSeleccionado(producto.id)
+                                            setBusquedaProducto(producto.nombre)
+                                        }}
+                                        className="px-4 py-3 text-white hover:bg-gray-600 cursor-pointer border-b border-gray-600 last:border-b-0">
+                                        <div className="flex justify-between">
+                                            <span>{producto.nombre}</span>
+                                            <span className="text-yellow-400">
+                                                {new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(producto.precio)}
+                                            </span>
+                                        </div>
+                                    </div>
+                                ))
+                            }
+                        </div>
+                    )}
                 </div>
 
                 <div className="mb-6">

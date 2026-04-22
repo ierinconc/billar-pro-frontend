@@ -22,7 +22,7 @@ function ModalProducto(props){
             "Authorization": "Bearer " + localStorage.getItem("token")
         },
         body: JSON.stringify({
-            nombre: nombre,
+            nombre: nombre.trim(),
             categoria: categoria,
             precio: parseFloat(precio),
             disponible: disponible
