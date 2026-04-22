@@ -1,5 +1,6 @@
 import Sidebar from "../components/Sidebar"
 import { useState, useEffect } from "react"
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from "recharts"
 
 
 function Reportes () {
@@ -174,7 +175,84 @@ function Reportes () {
                             {kpis ? kpis.numeroSesiones : "—"}
                         </p>
                     </div>
-                </div>        
+                </div>       
+
+                <div className="grid grid-cols-2 gap-4 mb-8">
+                    
+                    {/* Torta: Mesas vs Consumos */}
+                    <div className="bg-gray-800 rounded-xl p-6">
+                        <h3 className="text-white text-lg font-bold mb-4">Distribución de Ingresos</h3>
+                        {kpis && (kpis.totalMesas > 0 || kpis.totalConsumos > 0) ? (
+                            <ResponsiveContainer width="100%" height={300}>
+                                <PieChart>
+                                    <Pie
+                                        data={[
+                                            { name: "Tiempo de Mesa", value: kpis.totalMesas },
+                                            { name: "Consumos", value: kpis.totalConsumos }
+                                        ]}
+                                        cx="50%"
+                                        cy="50%"
+                                        outerRadius={100}
+                                        dataKey="value"
+                                        label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                                    >
+                                        <Cell fill="#facc15" />
+                                        <Cell fill="#3b82f6" />
+                                    </Pie>
+                                    <Tooltip 
+                                        contentStyle={{ backgroundColor: "#1f2937", border: "1px solid #facc15", borderRadius: "8px" }}
+                                        formatter={(value) => formatCOP(value)}
+                                    />
+                                </PieChart>
+                            </ResponsiveContainer>
+                        ) : (
+                            <p className="text-gray-400 text-sm">No hay datos para este período.</p>
+                        )}
+                    </div>
+
+
+                    {/* Torta: Distribución por Mesa */}
+                    <div className="bg-gray-800 rounded-xl p-6">
+                        <h3 className="text-white text-lg font-bold mb-4">Ingresos por Mesa</h3>
+                        {ingresosPorMesa.length > 0 ? (
+                            <ResponsiveContainer width="100%" height={300}>
+                                <PieChart>
+                                    <Pie
+                                        data={ingresosPorMesa}
+                                        cx="50%"
+                                        cy="50%"
+                                        outerRadius={100}
+                                        dataKey="totalRecaudado"
+                                        nameKey="numero"
+                                        label={({ cx, cy, midAngle, outerRadius, numero, percent, fill }) => {
+                                            const RADIAN = Math.PI / 180
+                                            const radius = outerRadius + 20
+                                            const x = cx + radius * Math.cos(-midAngle * RADIAN)
+                                            const y = cy + radius * Math.sin(-midAngle * RADIAN)
+                                            return (
+                                                <text x={x} y={y} fill={fill} textAnchor={x > cx ? "start" : "end"} dominantBaseline="central" fontSize="13">
+                                                    <tspan fontWeight="bold">Mesa {numero}</tspan>
+                                                    <tspan> · {(percent * 100).toFixed(0)}%</tspan>
+                                                </text>
+                                            )
+                                        }}
+                                    >
+                                        {ingresosPorMesa.map((_, index) => (
+                                            <Cell key={index} fill={["#facc15", "#3b82f6", "#10b981", "#ef4444", "#a855f7", "#f97316", "#06b6d4", "#ec4899"][index % 8]} />
+                                        ))}
+                                    </Pie>
+                                    <Tooltip 
+                                        contentStyle={{ backgroundColor: "#1f2937", border: "1px solid #facc15", borderRadius: "8px" }}
+                                        formatter={(value) => formatCOP(value)}
+                                    />
+                                </PieChart>
+                            </ResponsiveContainer>
+                        ) : (
+                            <p className="text-gray-400 text-sm">No hay datos para este período.</p>
+                        )}
+                    </div>
+
+                </div>
 
 
 
