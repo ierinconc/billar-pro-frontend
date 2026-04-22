@@ -1,21 +1,16 @@
 import Sidebar from "../components/Sidebar"
 import { useState, useEffect } from "react"
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from "recharts"
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts"
 
 
 function Reportes () {
 
     const [periodoActivo, setPeriodoActivo] = useState("diario")
-
     const [fechaSeleccionada, setFechaSeleccionada] = useState(new Date().toISOString().split('T')[0])
-
-    const [fechaFin, setFechaFin] = useState(new Date(). toISOString().split('T')[0])
+    const [fechaFin, setFechaFin] = useState(new Date().toISOString().split('T')[0])
     const [kpis, setKpis] = useState(null)
-
     const [ingresosPorDia, setIngresosPorDia] = useState([])
-
     const [productosTop, setProductosTop] = useState([])
-
     const [ingresosPorMesa, setIngresosPorMesa] = useState([])
 
 
@@ -70,28 +65,28 @@ function Reportes () {
     }, [periodoActivo, fechaSeleccionada, fechaFin])
 
     const formatCOP = (valor) => 
-    new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(valor)
+        new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(valor)
 
     const rellenarDiasVacios = (datos, inicio, fin) => {
-    const resultado = []
-    const fechaActual = new Date(inicio)
-    const fechaFin = new Date(fin)
-    
-    while (fechaActual <= fechaFin) {
-        const fechaStr = fechaActual.toISOString().split('T')[0]
-        const existente = datos.find(d => d.fecha === fechaStr)
+        const resultado = []
+        const fechaActual = new Date(inicio)
+        const fechaFin = new Date(fin)
         
-        resultado.push(existente || {
-            fecha: fechaStr,
-            totalMesas: 0,
-            totalConsumos: 0,
-            totalGeneral: 0
-        })
+        while (fechaActual <= fechaFin) {
+            const fechaStr = fechaActual.toISOString().split('T')[0]
+            const existente = datos.find(d => d.fecha === fechaStr)
+            
+            resultado.push(existente || {
+                fecha: fechaStr,
+                totalMesas: 0,
+                totalConsumos: 0,
+                totalGeneral: 0
+            })
+            
+            fechaActual.setDate(fechaActual.getDate() + 1)
+        }
         
-        fechaActual.setDate(fechaActual.getDate() + 1)
-    }
-    
-    return resultado
+        return resultado
     }
 
 
@@ -201,7 +196,6 @@ function Reportes () {
 
                 <div className="grid grid-cols-2 gap-4 mb-8">
                     
-                    {/* Torta: Mesas vs Consumos */}
                     <div className="bg-gray-800 rounded-xl p-6">
                         <h3 className="text-white text-lg font-bold mb-4">Distribución de Ingresos</h3>
                         {kpis && (kpis.totalMesas > 0 || kpis.totalConsumos > 0) ? (
@@ -232,8 +226,6 @@ function Reportes () {
                         )}
                     </div>
 
-
-                    {/* Torta: Distribución por Mesa */}
                     <div className="bg-gray-800 rounded-xl p-6">
                         <h3 className="text-white text-lg font-bold mb-4">Ingresos por Mesa</h3>
                         {ingresosPorMesa.length > 0 ? (
@@ -276,7 +268,7 @@ function Reportes () {
 
                 </div>
 
-                 {periodoActivo !== "diario" && ingresosPorDia.length > 0 && (
+                {periodoActivo !== "diario" && ingresosPorDia.length > 0 && (
                     <div className="bg-gray-800 rounded-xl p-6 mb-8">
                         <h3 className="text-white text-lg font-bold mb-4">Tendencia de Ingresos</h3>
                         <ResponsiveContainer width="100%" height={280}>
@@ -310,8 +302,35 @@ function Reportes () {
                     </div>
                 )}       
 
-
-
+                <div className="bg-gray-800 rounded-xl p-6 mb-8">
+                    <h3 className="text-white text-lg font-bold mb-4">Top Productos Vendidos</h3>
+                    {productosTop.length === 0 ? (
+                        <p className="text-gray-400 text-sm">No hay productos vendidos en este período.</p>
+                    ) : (
+                        <table className="w-full">
+                            <thead>
+                                <tr className="border-b border-gray-700">
+                                    <th className="text-left text-yellow-400 text-xs uppercase px-4 py-3">#</th>
+                                    <th className="text-left text-yellow-400 text-xs uppercase px-4 py-3">Producto</th>
+                                    <th className="text-right text-yellow-400 text-xs uppercase px-4 py-3">Cantidad</th>
+                                    <th className="text-right text-yellow-400 text-xs uppercase px-4 py-3">Total Recaudado</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {productosTop.map((producto, index) => (
+                                    <tr key={index} className="border-b border-gray-700 last:border-b-0">
+                                        <td className="px-4 py-3 text-gray-400">
+                                            {index === 0 ? "🥇" : index === 1 ? "🥈" : index === 2 ? "🥉" : `#${index + 1}`}
+                                        </td>
+                                        <td className="px-4 py-3 text-white">{producto.nombre}</td>
+                                        <td className="px-4 py-3 text-gray-400 text-right">{producto.cantidadVendida} vendidas</td>
+                                        <td className="px-4 py-3 text-yellow-400 text-right font-bold">{formatCOP(producto.totalRecaudado)}</td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    )}
+                </div>
 
             </div>
         </div>
@@ -319,4 +338,3 @@ function Reportes () {
 }
 
 export default Reportes
-    
