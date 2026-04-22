@@ -6,6 +6,7 @@ function ModalMesa(props){
     const [consumos, setConsumos] = useState([])
     const [resumen, setResumen] = useState(null)
     const [modalConsumoAbierto, setModalConsumoAbierto] = useState(false)
+    const [costoTiempo, setCostoTiempo] = useState(0)
 
     useEffect(() => {
         const intervalo = setInterval(() => {
@@ -16,6 +17,9 @@ function ModalMesa(props){
             const horas = Math.floor(diff / 3600000)
             const minutos = Math.floor((diff % 3600000) / 60000)
             const segundos = Math.floor((diff % 60000) / 1000)
+
+            const horasDecimales = diff / 3600000
+            setCostoTiempo(horasDecimales * props.precio)
 
             const formato = 
                 String(horas).padStart(2, "0") + ":" + 
@@ -54,6 +58,11 @@ function ModalMesa(props){
 
     const formatCOP = (valor) => 
         new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(valor)
+
+    const redondearCOP = (valor) => Math.round(valor / 50) * 50
+    
+    const totalConsumos = consumos.reduce((suma, consumo) => suma + consumo.subtotal, 0)
+    const totalGeneral = costoTiempo + totalConsumos
 
     return (
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
@@ -100,15 +109,15 @@ function ModalMesa(props){
                 <div className="bg-gray-700 rounded-xl p-6 mb-6">
                     <div className="flex justify-between text-gray-400 text-sm mb-2">
                         <span>Tiempo de juego</span>
-                        <span>$0</span>
+                        <span>{formatCOP(redondearCOP(costoTiempo))}</span>
                     </div>
                     <div className="flex justify-between text-gray-400 text-sm mb-4">
                         <span>Consumos</span>
-                        <span>$0</span>
+                        <span>{formatCOP(redondearCOP(totalConsumos))}</span>
                     </div>
                     <div className="flex justify-between text-white font-bold text-lg">
                         <span>TOTAL</span>
-                        <span>$0</span>
+                        <span>{formatCOP(redondearCOP(totalGeneral))}</span>
                     </div>
                 </div>
 
@@ -131,15 +140,15 @@ function ModalMesa(props){
                         </div>
                         <div className="flex justify-between text-gray-400 text-sm mb-2">
                             <span>Tiempo de juego</span>
-                            <span>{formatCOP(resumen.totalAPagar)}</span>
+                            <span>{formatCOP(redondearCOP(resumen.totalAPagar))}</span>
                         </div>
                         <div className="flex justify-between text-gray-400 text-sm mb-4">
                             <span>Consumos</span>
-                            <span>{formatCOP(resumen.totalConsumos)}</span>
+                            <span>{formatCOP(redondearCOP(resumen.totalConsumos))}</span>
                         </div>
                         <div className="flex justify-between text-white font-bold text-xl mb-8">
                             <span>TOTAL</span>
-                            <span>{formatCOP(resumen.totalGeneral)}</span>
+                            <span>{formatCOP(redondearCOP(resumen.totalGeneral))}</span>
                         </div>
 
                         <button 

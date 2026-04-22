@@ -76,6 +76,7 @@ function Dashboard(){
                 id={mesaSeleccionada.id}
                 numero={mesaSeleccionada.numero}
                 horaInicio={mesaSeleccionada.horaInicio}
+                precio={mesaSeleccionada.precioPorHora}
                 onCerrar={() => setMesaSeleccionada(null)}
             />    
         )}
