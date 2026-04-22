@@ -72,6 +72,28 @@ function Reportes () {
     const formatCOP = (valor) => 
     new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(valor)
 
+    const rellenarDiasVacios = (datos, inicio, fin) => {
+    const resultado = []
+    const fechaActual = new Date(inicio)
+    const fechaFin = new Date(fin)
+    
+    while (fechaActual <= fechaFin) {
+        const fechaStr = fechaActual.toISOString().split('T')[0]
+        const existente = datos.find(d => d.fecha === fechaStr)
+        
+        resultado.push(existente || {
+            fecha: fechaStr,
+            totalMesas: 0,
+            totalConsumos: 0,
+            totalGeneral: 0
+        })
+        
+        fechaActual.setDate(fechaActual.getDate() + 1)
+    }
+    
+    return resultado
+    }
+
 
     return (
         <div className="flex min-h-screen bg-gray-900"> 
@@ -254,7 +276,39 @@ function Reportes () {
 
                 </div>
 
-
+                 {periodoActivo !== "diario" && ingresosPorDia.length > 0 && (
+                    <div className="bg-gray-800 rounded-xl p-6 mb-8">
+                        <h3 className="text-white text-lg font-bold mb-4">Tendencia de Ingresos</h3>
+                        <ResponsiveContainer width="100%" height={280}>
+                            <BarChart data={
+                                periodoActivo === "mensual"
+                                    ? rellenarDiasVacios(
+                                        ingresosPorDia, 
+                                        fechaSeleccionada.substring(0, 7) + "-01",
+                                        `${fechaSeleccionada.substring(0, 7)}-${new Date(parseInt(fechaSeleccionada.split("-")[0]), parseInt(fechaSeleccionada.split("-")[1]), 0).getDate()}`
+                                    )
+                                    : rellenarDiasVacios(ingresosPorDia, fechaSeleccionada, fechaFin)
+                            }>
+                                <XAxis 
+                                    dataKey="fecha" 
+                                    stroke="#9ca3af"
+                                    tickFormatter={(fecha) => {
+                                        const meses = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"]
+                                        const [_, mes, dia] = fecha.split("-")
+                                        return `${meses[parseInt(mes) - 1]} ${parseInt(dia)}`
+                                    }}
+                                />
+                                <YAxis stroke="#9ca3af" />
+                                <Tooltip 
+                                    contentStyle={{ backgroundColor: "#1f2937", border: "1px solid #facc15", borderRadius: "8px" }}
+                                    labelStyle={{ color: "#facc15" }}
+                                    formatter={(value) => formatCOP(value)}
+                                />
+                                <Bar dataKey="totalGeneral" fill="#facc15" radius={[8, 8, 0, 0]} maxBarSize={30} />
+                            </BarChart>
+                        </ResponsiveContainer>
+                    </div>
+                )}       
 
 
 
