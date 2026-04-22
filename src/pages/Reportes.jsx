@@ -1,6 +1,8 @@
 import Sidebar from "../components/Sidebar"
 import { useState, useEffect } from "react"
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts"
+import jsPDF from "jspdf"
+import html2canvas from "html2canvas-pro"
 
 
 function Reportes () {
@@ -89,14 +91,43 @@ function Reportes () {
         return resultado
     }
 
+    const descargarPDF = async () => {
+        const elemento = document.getElementById("reporte-contenido")
+        
+        const canvas = await html2canvas(elemento, {
+            backgroundColor: "#111827",
+            scale: 2
+        })
+        
+        const imgData = canvas.toDataURL("image/png")
+        const pdf = new jsPDF("p", "mm", "a4")
+        
+        const anchoPDF = pdf.internal.pageSize.getWidth()
+        const altoPDF = (canvas.height * anchoPDF) / canvas.width
+        
+        pdf.addImage(imgData, "PNG", 0, 0, anchoPDF, altoPDF)
+        
+        const fecha = new Date().toISOString().split('T')[0]
+        pdf.save(`BillarPro-Reporte-${periodoActivo}-${fecha}.pdf`)
+    }
+
 
     return (
         <div className="flex min-h-screen bg-gray-900"> 
             <Sidebar/>
-            <div className="flex-1 p-8">
-                <h1 className="text-white text-3xl font-bold mb-2">Reportes de Gestión</h1>
-                <p className="text-gray-400 mb-8">Análisis detallado de rendimiento y flujo de caja del salón</p>
-
+            <div className="flex-1 p-8" id="reporte-contenido">
+                <div className="flex justify-between items-start mb-8">
+                    <div>
+                        <h1 className="text-white text-3xl font-bold mb-2">Reportes de Gestión</h1>
+                        <p className="text-gray-400">Análisis detallado de rendimiento y flujo de caja del salón</p>
+                    </div>
+                    <button 
+                        onClick={descargarPDF}
+                        data-html2canvas-ignore="true"
+                        className="bg-yellow-400 text-gray-900 font-bold px-6 py-3 rounded-lg hover:bg-yellow-300 flex items-center gap-2">
+                        📄 Descargar PDF
+                    </button>
+                </div>
                 <div className="flex gap-2 mb-8 bg-gray-800 p-2 rounded-xl w-fit">
                     <button className={`px-6 py-2 rounded-lg font-bold transition-colors ${
                         periodoActivo === "diario"
