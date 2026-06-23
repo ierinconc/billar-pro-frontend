@@ -1,70 +1,98 @@
+import { memo, useEffect, useMemo, useState } from "react"
 
-import { useState, useEffect } from "react"
-
-
-function MesaCard(props){
-
-
-    const [tiempoTranscurrido, setTiempoTranscurrido] = useState ("00:00:00")
+function MesaCard({ mesa, formatCOP, onActualizar, onVerDetalle }){
+    const [ocupando, setOcupando] = useState(false)
+    const [ahora, setAhora] = useState(Date.now())
+    const estaOcupada = mesa.estado === "OCUPADA"
 
     useEffect(() => {
-    if(props.estado !== "OCUPADA") return
+        if (!estaOcupada || !mesa.horaInicio) return
 
-    const intervalo = setInterval(() => {
-        const ahora = new Date()
-        const inicio = new Date(props.horaInicio)
-        const diff = ahora - inicio
+        const intervalo = setInterval(() => setAhora(Date.now()), 1000)
+        return () => clearInterval(intervalo)
+    }, [estaOcupada, mesa.horaInicio])
 
+    const datosTiempo = useMemo(() => {
+        if (!estaOcupada || !mesa.horaInicio) {
+            return {
+                tiempo: "Disponible",
+                costo: 0
+            }
+        }
+
+        const diff = Math.max(0, ahora - new Date(mesa.horaInicio).getTime())
         const horas = Math.floor(diff / 3600000)
         const minutos = Math.floor((diff % 3600000) / 60000)
         const segundos = Math.floor((diff % 60000) / 1000)
+        const costo = (diff / 3600000) * Number(mesa.precioPorHora || 0)
 
-        const formato = 
-            String(horas).padStart(2, "0") + ":" +
-            String(minutos).padStart(2, "0") + ":" +
-            String(segundos).padStart(2, "0")
-
-        setTiempoTranscurrido(formato)
-    }, 1000)
-
-        return () => clearInterval(intervalo)
-
-    }, [props.estado, props.horaInicio])
+        return {
+            tiempo: `${String(horas).padStart(2, "0")}:${String(minutos).padStart(2, "0")}:${String(segundos).padStart(2, "0")}`,
+            costo
+        }
+    }, [ahora, estaOcupada, mesa.horaInicio, mesa.precioPorHora])
 
     const handleOcupar = async () => {
-        await fetch (`http://localhost:8080/api/mesas/${props.id}/ocupar`,{
-            method: "PUT",
-            headers: {
-                "Authorization" : "Bearer " + localStorage.getItem("token")
+        setOcupando(true)
+
+        try {
+            const respuesta = await fetch(`http://localhost:8080/api/mesas/${mesa.id}/ocupar`, {
+                method: "PUT",
+                headers: {
+                    "Authorization": "Bearer " + localStorage.getItem("token")
+                }
+            })
+
+            if (!respuesta.ok) {
+                throw new Error("No se pudo ocupar la mesa.")
             }
-        })
-        props.onActualizar()
+
+            onActualizar?.()
+        } catch (error) {
+            alert(error.message)
+        } finally {
+            setOcupando(false)
+        }
     }
 
-
     return (
-        <div className={`bg-gray-800 rounded-xl p-6 flex flex-col gap-4 border-2 ${
-            props.estado === "OCUPADA" ? "border-red-400" : "border-transparent"
-        }`}>
-            <div className="flex justify-between items-center">
-                <h2 className="text-white text-x1 font-bold">Mesa {props.numero}</h2>
-                <span className={props.estado === "LIBRE" ? "bg-green-500 text-white text-xs px-2 py-1 rounded-full" : "bg-yellow-400 text-white text-xs px-2 py-1 rounded-full"}>{props.estado}</span>
+        <article className={`bp-table-card ${estaOcupada ? "bp-table-card-occupied" : "bp-table-card-free"}`}>
+            <div className="mb-5 flex items-start justify-between gap-4">
+                <div>
+                    <p className="bp-overline">Mesa</p>
+                    <h2 className="text-4xl font-black">{mesa.numero}</h2>
+                </div>
+
+                <span className={`bp-status-pill ${estaOcupada ? "bp-status-occupied" : "bp-status-free"}`}>
+                    {estaOcupada ? "Ocupada" : "Libre"}
+                </span>
             </div>
 
-            <p className="text-gray-400 text-sm">${props.precio} / hora</p>
-
-            <div className="bg-gray-700 rounded-lg p-4 text-center">
-                <p className="text-gray-400 text-xs mb-l">TIEMPO TRANSCURRIDO</p>
-                <p className="text-yellow-400 text-3xl font-bold">{tiempoTranscurrido}</p>
+            <div className="bp-table-timer mb-5 p-5 text-center">
+                <p className={`font-mono text-4xl font-black ${estaOcupada ? "bp-time-occupied" : "bp-time-free"}`}>
+                    {datosTiempo.tiempo}
+                </p>
+                <p className="mt-2 text-sm opacity-70">
+                    {estaOcupada ? `${formatCOP(datosTiempo.costo)} en tiempo` : `${formatCOP(mesa.precioPorHora)} / hora`}
+                </p>
             </div>
 
-            <button onClick= {props.estado === "LIBRE" ? handleOcupar : props.onVerDetalle} className={props.estado === "LIBRE" ? "w-full bg-yellow-500 text-gray-900  font-bold py-2 rounded-lg hover:bg-yellow-300" : "w-full bg-red-600 text-gray-900  font-bold py-2 rounded-lg hover:bg-red-500"}>
-                {props.estado === "LIBRE" ? "INICIAR PARTIDA" : "VER DETALLE"}
-            </button>
-
-        </div>
-
+            {estaOcupada ? (
+                <button
+                    onClick={() => onVerDetalle?.(mesa)}
+                    className="bp-primary-button w-full">
+                    Ver y cerrar mesa
+                </button>
+            ) : (
+                <button
+                    onClick={handleOcupar}
+                    disabled={ocupando}
+                    className="bp-success-button w-full">
+                    {ocupando ? "Ocupando..." : "Ocupar mesa"}
+                </button>
+            )}
+        </article>
     )
 }
 
-export default MesaCard
+export default memo(MesaCard)

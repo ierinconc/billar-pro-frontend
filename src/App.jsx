@@ -1,13 +1,15 @@
 import Dashboard from "./pages/Dashboard"
 import Login from "./pages/Login"
 import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom"
-import Productos from "./pages/Productos"
 import PrivateRoute from "./components/PrivateRoute"
 import Reportes from "./pages/Reportes"
+import GestionNegocio from "./pages/GestionNegocio"
+import { ThemeProvider } from "./context/ThemeContext"
 
 
 function App() {
   return (
+    <ThemeProvider>
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Navigate to="/login"/>} />
@@ -17,9 +19,19 @@ function App() {
                 <Dashboard/>
             </PrivateRoute>
           } />
+          <Route path="/negocio" element={
+            <PrivateRoute>
+                <GestionNegocio/>
+            </PrivateRoute>
+          } />
+          <Route path="/mesas" element={
+            <PrivateRoute>
+                <GestionNegocio initialTab="mesas"/>
+            </PrivateRoute>
+          } />
           <Route path="/productos" element={
             <PrivateRoute>
-                <Productos/>
+                <GestionNegocio initialTab="productos"/>
             </PrivateRoute>
           } />
           <Route path="/reportes" element={
@@ -29,6 +41,7 @@ function App() {
           } />
         </Routes>  
       </BrowserRouter>
+    </ThemeProvider>
   )
 }
 
