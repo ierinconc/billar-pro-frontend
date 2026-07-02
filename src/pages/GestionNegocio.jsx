@@ -200,12 +200,8 @@ function GestionNegocio({ initialTab = "mesas" }) {
                         </p>
                     </div>
 
-                    <button
-                        onClick={cargarDatos}
-                        disabled={cargando}
-                        className="bp-secondary-button disabled:opacity-60">
-                        {cargando ? "Actualizando..." : "Actualizar"}
-                    </button>
+            
+
                 </section>
 
                 <section className="mb-5 grid gap-4 xl:grid-cols-[1.1fr_0.9fr]">

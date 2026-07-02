@@ -97,12 +97,7 @@ function Dashboard(){
                             </p>
                         </div>
 
-                        <button
-                            onClick={() => cargarMesas({ silencioso: true })}
-                            disabled={refrescando}
-                            className="w-full rounded-2xl bg-yellow-400 px-5 py-3 font-black text-gray-950 transition-colors hover:bg-yellow-300 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto">
-                            {refrescando ? "Actualizando..." : "Actualizar salón"}
-                        </button>
+                        
                     </div>
                 </section>
 
